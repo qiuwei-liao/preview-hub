@@ -1,0 +1,9 @@
+# build output
+dist/
+*.tsbuildinfo
+
+# deps
+node_modules/
+
+# editor
+.DS_Store
