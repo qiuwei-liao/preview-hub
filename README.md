@@ -487,6 +487,8 @@ export const previewHubConfig: PreviewHubConfig = {
 
 传 `config.miniapp` 即可解锁"小程序"载体。**注意：小程序壳里加载的依然是同源 Web 页面**（`url` 字段填真实路由），包外会叠加胶囊按钮 + tabbar + 导航栈模拟小程序外观。
 
+> `tabbar` 为必填字段；如果被预览页面自带底部导航、不需要壳再画一层 TabBar，请传 `tabbar: []`（避免"双 TabBar"，详见 [已知边界](#8-已知边界)）。
+
 ```typescript
 import type { PreviewHubConfig } from "@qiuwei-liao/preview-hub";
 
@@ -528,6 +530,8 @@ export const previewHubConfig: PreviewHubConfig = {
 ### 5.5 配置 App 载体
 
 传 `config.app` 即可解锁"App"载体。**注意：App 壳里加载的依然是同源 Web 页面**（`route` 填真实路由），包外会叠加 iOS 原生风格的导航栏 + 底部 TabBar + Home 指示条模拟原生 App 外观。
+
+> `tabbar` 为必填字段；如果被预览页面自带底部导航、不需要壳再画一层 TabBar，请传 `tabbar: []`（避免"双 TabBar"，详见 [已知边界](#8-已知边界)）。
 
 ```typescript
 import type { PreviewHubConfig } from "@qiuwei-liao/preview-hub";
@@ -881,7 +885,7 @@ packages/preview-hub/
 
 - **小程序载体实际渲染的是同源 Web 页面**。所谓"小程序壳"是在 Web 页面外层叠加一个模拟的胶囊按钮 + tabbar + 导航栈，iframe 里加载的依然是 `/m/*` 这类同源路由。它不是真正的小程序运行时——小程序原生组件、原生 API、分包等无法在此模拟。
 - **App 载体同样是 WebView 模拟**。App 壳（iOS 原生导航栏 + 底部 TabBar + Home 指示条）包裹的是同源 Web 页面；它不是真正的原生 App 运行时，原生 SDK / 推送 / 系统权限等无法在此模拟。切换 App 页面时，被预览页面需要像 Web 端一样接入 Preview Bridge（监听 `preview:set-route`）才能完成客户端导航，否则只显示首个路由页面。
-- **注意避免"双 TabBar"**。App 壳的底部 TabBar（`config.app.tabbar`）与页面自带底部导航互斥：如果被预览的页面自身已经是带底部导航的移动端 H5（例如小程序页面直接拿来当 `app.route` 预览），再配置 `config.app.tabbar` 会叠出两层 TabBar（一层页面自带的、一层 App 壳的）。按场景二选一：页面自带导航 → 不配置 `config.app.tabbar`（App 壳只保留状态栏 + 导航栏）；想用 App 壳的 TabBar → 被预览页面应去掉自带底部导航，只渲染纯内容。App 载体面向"原生壳 + 纯内容页"的形态；自带完整导航的页面更适合用 Web 或小程序载体预览。
+- **注意避免"双 TabBar"**。App 壳（`config.app.tabbar`）与小程序壳（`config.miniapp.tabbar`）的底部 TabBar 都只适合"壳提供导航、页面渲染纯内容"的形态：如果被预览的页面自身已经是带底部导航的移动端 H5（例如小程序页面直接拿来当 `app.route` 预览），再配置对应载体的 `tabbar` 会叠出两层 TabBar（一层页面自带的、一层壳的）。按场景二选一：页面自带导航 → 不配置壳的 tabbar（`config.app.tabbar` / `config.miniapp.tabbar` 类型上必填，不需要时传空数组 `[]`，壳就只保留状态栏/胶囊 + 导航栏）；想用壳的 TabBar → 被预览页面应去掉自带底部导航，只渲染纯内容。自带完整导航的页面更适合用 Web 载体预览。
 - **跨域 iframe 需要被预览页面配合接入**。postMessage 通信要求被预览页面一侧也实现 Preview Bridge（监听 `preview:navigate`、上报 `preview:ready` / `preview:route-changed` / `preview:401`）。如果目标页面不在你的控制下（例如第三方站点），工作台只能做静态壳，无法同步路由或触发登录重建。
 - **真实登录依赖接入方实现 `AuthAdapter`**。包内不带任何登录逻辑；如果不传 `config.authAdapter`，工作台会退化为纯静态预览（不触发真实登录、不支持 401 重建），相关 UI 也会自动隐藏。
 - **Preview Bridge 组件留在接入层**。因为它依赖 `next/navigation`（`usePathname` / `useRouter`），是 Next.js 特定的 iframe 内侧桥接，不适合放进框架无关的包内。其他框架（Vite / Remix / CRA）需要自己写等价桥接，协议字段见 [iframe 通信机制](#22-iframe-同源通信机制)。
