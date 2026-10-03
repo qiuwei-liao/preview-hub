@@ -1,0 +1,4 @@
+# pnpm 11 默认不执行依赖的构建脚本；
+# tsx 依赖 esbuild，需要允许其构建以获取平台二进制（否则 pnpm install 报 ERR_PNPM_IGNORED_BUILDS）。
+allowBuilds:
+  esbuild: true

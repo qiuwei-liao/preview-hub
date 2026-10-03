@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/state/__tests__/*.test.ts",
+    "test": "node --import tsx --test src/state/__tests__/*.test.ts src/renderer/__tests__/*.test.tsx",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [
