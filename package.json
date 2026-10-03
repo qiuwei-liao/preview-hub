@@ -1,5 +1,5 @@
 {
-  "name": "@preview-hub/core",
+  "name": "@qiuwei-liao/preview-hub",
   "version": "0.1.0",
   "description": "Config-driven multi-role / multi-surface / multi-device preview workbench for React / Next.js apps.",
   "type": "module",
@@ -32,8 +32,14 @@
     "react"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qiuwei-liao/preview-hub.git"
+  },
+  "homepage": "https://github.com/qiuwei-liao/preview-hub#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "peerDependencies": {
     "next": ">=14",

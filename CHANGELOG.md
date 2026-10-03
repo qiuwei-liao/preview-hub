@@ -16,4 +16,4 @@
 
 ### Notes
 - 独立开源版本：零业务依赖，所有业务通过 `PreviewHubConfig` 注入。
-- 已发布为 `@preview-hub/core`，可通过 npm / GitHub Packages 安装。
+- 已发布为 `@qiuwei-liao/preview-hub`，可通过 npm / GitHub Packages 安装。

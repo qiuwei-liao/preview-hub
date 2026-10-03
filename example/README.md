@@ -15,7 +15,7 @@ example/
 ### 1. 安装
 
 ```bash
-pnpm add @preview-hub/core
+pnpm add @qiuwei-liao/preview-hub
 ```
 
 ### 2. 写配置（参考 `minimal-config.ts`）
@@ -28,7 +28,7 @@ pnpm add @preview-hub/core
 
 ```tsx
 // app/preview/page.tsx
-import { PreviewHub } from "@preview-hub/core";
+import { PreviewHub } from "@qiuwei-liao/preview-hub";
 import { minimalConfig } from "./minimal-config";
 
 export default function PreviewPage() {
