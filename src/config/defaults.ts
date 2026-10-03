@@ -282,7 +282,9 @@ export function createDefaultState(config: PreviewHubConfig): PreviewState {
   const defaultPageRoute =
     (defaultSurface === "mini_program"
       ? defaultPage?.miniProgram?.route
-      : defaultPage?.web?.route) ?? defaultPage?.web?.route ?? "/";
+      : defaultSurface === "app"
+        ? defaultPage?.app?.route
+        : defaultPage?.web?.route) ?? defaultPage?.web?.route ?? "/";
 
   const experience = {
     role: defaultRole,

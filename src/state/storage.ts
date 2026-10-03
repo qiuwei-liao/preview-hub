@@ -21,7 +21,7 @@ export interface PersistedState {
 }
 
 function isPreviewSurface(value: unknown): value is PreviewSurface {
-  return value === "web" || value === "mini_program";
+  return value === "web" || value === "mini_program" || value === "app";
 }
 
 function isThemeMode(value: unknown): value is ThemeMode {

@@ -9,6 +9,8 @@ import { getTheme } from "../config/defaults";
 import { WebRenderer, getDeviceOuterSize, type SurfaceRendererProps } from "../renderer/web-renderer";
 import { MiniProgramRenderer } from "../renderer/mini-program-renderer";
 import { getMiniProgramShellSize } from "../renderer/mini-program-shell";
+import { AppRenderer } from "../renderer/app-renderer";
+import { getAppShellSize } from "../renderer/app-shell";
 
 interface FocusCanvasProps extends SurfaceRendererProps {
   experience: PreviewExperience;
@@ -30,9 +32,12 @@ export function FocusCanvas({ experience, theme = "dark", ...rest }: FocusCanvas
   }, []);
 
   const isMini = experience.surface === "mini_program";
+  const isApp = experience.surface === "app";
   const natural = isMini
     ? getMiniProgramShellSize(experience.device)
-    : getDeviceOuterSize(experience.device);
+    : isApp
+      ? getAppShellSize(experience.device)
+      : getDeviceOuterSize(experience.device);
 
   const scale = Math.max(
     0.25,
@@ -68,6 +73,8 @@ export function FocusCanvas({ experience, theme = "dark", ...rest }: FocusCanvas
         >
           {isMini ? (
             <MiniProgramRenderer experience={experience} {...rest} />
+          ) : isApp ? (
+            <AppRenderer experience={experience} {...rest} />
           ) : (
             <WebRenderer experience={experience} {...rest} />
           )}

@@ -11,8 +11,9 @@ import { createPageRegistry } from "../registry/page";
 import { SURFACE_LABELS } from "../types";
 import type { PreviewSurface } from "../types";
 
-const SURFACES: PreviewSurface[] = ["web", "mini_program"];
+const SURFACES: PreviewSurface[] = ["web", "mini_program", "app"];
 const MINI_GREEN = "#07C160";
+const APP_BLUE = "#007AFF";
 
 export function SurfaceSwitcher() {
   const { state, actions } = usePreviewState();
@@ -25,11 +26,17 @@ export function SurfaceSwitcher() {
     [config.pages, config.pageIdAliases],
   );
 
-  // 当前 Role 在小程序下是否有可用页面
+  // 当前 Role 在 mini_program / app 下是否有可用页面
   const miniSupported =
     pageRegistry.getPagesForSurface("mini_program", state.experience.role).length > 0;
+  const appSupported =
+    pageRegistry.getPagesForSurface("app", state.experience.role).length > 0;
 
-  const isDisabled = (s: PreviewSurface) => s === "mini_program" && !miniSupported;
+  const isDisabled = (s: PreviewSurface) =>
+    (s === "mini_program" && !miniSupported) || (s === "app" && !appSupported);
+
+  const accentColor = (s: PreviewSurface) =>
+    s === "mini_program" ? MINI_GREEN : s === "app" ? APP_BLUE : t.text;
 
   return (
     <div
@@ -51,7 +58,7 @@ export function SurfaceSwitcher() {
             key={s}
             disabled={disabled}
             onClick={() => actions.setSurface(s)}
-            title={disabled ? "当前角色不支持小程序" : `切换为${SURFACE_LABELS[s]}`}
+            title={disabled ? "当前角色不支持该载体" : `切换为${SURFACE_LABELS[s]}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -64,8 +71,8 @@ export function SurfaceSwitcher() {
               border: "none",
               opacity: disabled ? 0.45 : 1,
               background: active ? "#00704A" : "transparent",
-              color: active ? "#fff" : s === "mini_program" ? MINI_GREEN : t.text,
-              fontWeight: active || s === "mini_program" ? 600 : 400,
+              color: active ? "#fff" : accentColor(s),
+              fontWeight: active || s !== "web" ? 600 : 400,
             }}
           >
             {SURFACE_LABELS[s]}

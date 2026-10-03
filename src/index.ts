@@ -18,6 +18,8 @@ export type {
   MiniappConfig,
   MiniappPage,
   MiniappTabBarItem,
+  AppConfig,
+  AppTabBarItem,
   DefaultStateConfig,
 } from "./config/types";
 
@@ -54,6 +56,10 @@ export type { DeviceRegistry } from "./registry/device";
 
 // 会话
 export { NoopAuthAdapter } from "./session/auth-adapter";
+
+// App 载体渲染器与外壳（供自定义宿主嵌入）
+export { AppRenderer } from "./renderer/app-renderer";
+export { AppShell, getAppShellSize } from "./renderer/app-shell";
 
 // 工具函数（纯逻辑，无 React 依赖）
 export { sendToIframe, listenPreviewMessages, sendToHub } from "./renderer/bus";

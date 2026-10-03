@@ -19,6 +19,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/state/__tests__/*.test.ts",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [
@@ -35,9 +36,9 @@
     "access": "public"
   },
   "peerDependencies": {
+    "next": ">=14",
     "react": ">=19",
-    "react-dom": ">=19",
-    "next": ">=14"
+    "react-dom": ">=19"
   },
   "peerDependenciesMeta": {
     "next": {
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@types/react": ">=19",
     "@types/react-dom": ">=19",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }

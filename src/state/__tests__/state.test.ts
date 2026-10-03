@@ -6,14 +6,58 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { resolvePreviewExperience } from "../resolver";
-import { loadPersistedState } from "../storage";
-import type { PreviewExperience, PreviewState } from "../types";
+import type { ResolverRegistries } from "../resolver";
+import { loadPersistedState, type PersistedState } from "../storage";
+import { createPageRegistry } from "../../registry/page";
+import { createDeviceRegistry } from "../../registry/device";
+import type { PageDef, PreviewExperience, PreviewState } from "../../types";
+
+const TEST_PAGES: PageDef[] = [
+  {
+    id: "orders",
+    title: "订单",
+    roles: ["customer", "merchant"],
+    web: { route: "/m/orders" },
+    miniProgram: { route: "/pages/demo/orders/orders" },
+    app: { route: "/app/orders" },
+  },
+  {
+    id: "customers",
+    title: "客户",
+    roles: ["merchant"],
+    web: { route: "/m/customers" },
+  },
+  {
+    id: "ai",
+    title: "AI 助手",
+    roles: ["merchant"],
+    web: { route: "/m/ai" },
+  },
+  {
+    id: "me",
+    title: "我的",
+    roles: ["merchant"],
+    web: { route: "/m/me" },
+  },
+  {
+    id: "admin-dashboard",
+    title: "控制台",
+    roles: ["platform_admin"],
+    web: { route: "/admin" },
+  },
+];
+
+const registries: ResolverRegistries = {
+  pages: createPageRegistry(TEST_PAGES, { home: "me" }),
+  devices: createDeviceRegistry(),
+};
 
 // 构造一个合法的初始 focus experience
 function baseExperience(): PreviewExperience {
   return resolvePreviewExperience(
     { role: "merchant", surface: "web", pageId: "orders" },
     undefined,
+    registries,
   );
 }
 
@@ -72,6 +116,7 @@ test("role 切换恢复该角色的 lastRoute（resolver 机制）", () => {
       ...state.experience,
       page: { pageId: state.experience.page.pageId, route: lastRoute },
     },
+    registries,
   );
   assert.equal(resolved.role, "customer");
   assert.equal(resolved.page.route, lastRoute);
@@ -152,7 +197,20 @@ test("toggleComparisonSync 切换指定同步键", () => {
 });
 
 test("storage 默认值：三角色 lastRouteByRole 齐全", () => {
-  const persisted = loadPersistedState(); // node 无 window → 返回默认
+  const defaultPersisted: PersistedState = {
+    lastRole: "merchant",
+    lastSurface: "web",
+    lastDeviceId: "iphone-18-pro",
+    lastRouteByRole: {
+      customer: "/m/orders",
+      merchant: "/m/orders",
+      platform_admin: "/admin",
+    },
+    theme: "dark",
+    favorites: [],
+    recentPages: [],
+  };
+  const persisted = loadPersistedState("preview-hub", defaultPersisted); // node 无 window → 返回默认
   assert.ok(persisted.lastRouteByRole.customer);
   assert.ok(persisted.lastRouteByRole.merchant);
   assert.ok(persisted.lastRouteByRole.platform_admin);

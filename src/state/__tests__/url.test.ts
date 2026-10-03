@@ -64,11 +64,17 @@ test("缺省参数不出现在 URL 中", () => {
   );
 });
 
-test("parsePreviewUrl 丢弃非法 role / surface 值", () => {
+test("parsePreviewUrl 丢弃非法 surface 值（role 为开放值不做白名单）", () => {
   const parsed = parsePreviewUrl(
     "?role=hacker&surface=tv&pageId=orders&device=ipad-11",
   );
-  assert.deepEqual(parsed, { pageId: "orders", deviceId: "ipad-11" });
+  assert.deepEqual(parsed, { role: "hacker", pageId: "orders", deviceId: "ipad-11" });
+});
+
+test("parsePreviewUrl 支持 app surface", () => {
+  const parsed = parsePreviewUrl("?surface=app&pageId=orders");
+  assert.deepEqual(parsed, { surface: "app", pageId: "orders" });
+  assert.equal(buildPreviewUrl({ surface: "app" }), "/preview?surface=app");
 });
 
 test("空 search 解析为空对象", () => {

@@ -20,6 +20,8 @@ import { getPageRoute } from "../state/resolver";
 import { WebRenderer, getDeviceOuterSize, type SurfaceRendererProps } from "../renderer/web-renderer";
 import { MiniProgramRenderer } from "../renderer/mini-program-renderer";
 import { getMiniProgramShellSize } from "../renderer/mini-program-shell";
+import { AppRenderer } from "../renderer/app-renderer";
+import { getAppShellSize } from "../renderer/app-shell";
 
 type SyncKey = "page" | "scroll" | "data";
 
@@ -45,9 +47,12 @@ function ComparisonColumn({
   scale,
 }: ColumnProps) {
   const isMini = experience.surface === "mini_program";
+  const isApp = experience.surface === "app";
   const natural = isMini
     ? getMiniProgramShellSize(experience.device)
-    : getDeviceOuterSize(experience.device);
+    : isApp
+      ? getAppShellSize(experience.device)
+      : getDeviceOuterSize(experience.device);
 
   return (
     <div
@@ -61,7 +66,7 @@ function ComparisonColumn({
       }}
     >
       <span style={{ fontSize: 12, color: "#8b949e" }}>
-        {side === "left" ? "左" : "右"} · {experience.surface === "mini_program" ? "小程序" : "Web"} · {experience.device.model}
+        {side === "left" ? "左" : "右"} · {SURFACE_LABELS[experience.surface]} · {experience.device.model}
       </span>
 
       {/* 设备本体（按 scale 缩放） */}
@@ -83,6 +88,13 @@ function ComparisonColumn({
         >
           {isMini ? (
             <MiniProgramRenderer
+              experience={experience}
+              readOnly={readOnly}
+              {...rendererCallbacks}
+              onRouteChange={(route) => onRouteChange(side, route)}
+            />
+          ) : isApp ? (
+            <AppRenderer
               experience={experience}
               readOnly={readOnly}
               {...rendererCallbacks}
@@ -172,7 +184,9 @@ export function ComparisonCanvas({
     const natural =
       exp.surface === "mini_program"
         ? getMiniProgramShellSize(exp.device)
-        : getDeviceOuterSize(exp.device);
+        : exp.surface === "app"
+          ? getAppShellSize(exp.device)
+          : getDeviceOuterSize(exp.device);
     return Math.max(
       0.2,
       Math.min((win.h - 220) / natural.height, (win.w / 2 - 60) / natural.width, 0.6),

@@ -1,4 +1,4 @@
-// 最小配置示例：2 个角色 + 3 个页面 + 1 个环境
+// 最小配置示例：2 个角色 + 3 个页面 + 1 个环境 + App 载体
 // 复制到你自己的项目后，把 route 改成你实际的页面路径。
 
 import type { PreviewHubConfig, PageDef, RoleDef } from "@preview-hub/core";
@@ -10,12 +10,14 @@ const pages: PageDef[] = [
     title: "首页",
     roles: ["user", "admin"],
     web: { route: "/" },
+    app: { route: "/" },
   },
   {
     id: "profile",
     title: "个人中心",
     roles: ["user", "admin"],
     web: { route: "/profile" },
+    app: { route: "/profile" },
   },
   {
     id: "admin",
@@ -42,6 +44,13 @@ export const minimalConfig: PreviewHubConfig = {
       origin: "http://localhost:3000",
     },
   ],
+  // App 载体底部导航（可选，不传则隐藏 App 载体）
+  app: {
+    tabbar: [
+      { pageId: "home", label: "首页", icon: "home" },
+      { pageId: "profile", label: "我的", icon: "mine" },
+    ],
+  },
   // 可选：不实现登录时用 NoopAuthAdapter（已内置）
   // auth: new NoopAuthAdapter(),
 };

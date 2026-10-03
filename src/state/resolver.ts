@@ -25,6 +25,7 @@ export function isValidSurfaceDevice(
   device: PreviewDevice,
 ): boolean {
   if (surface === "mini_program") return device.family === "mobile";
+  if (surface === "app") return device.family === "mobile" || device.family === "tablet";
   return true; // web 允许 mobile / tablet / desktop
 }
 
@@ -32,9 +33,9 @@ export function getDefaultDeviceForSurface(
   surface: PreviewSurface,
   devices: DeviceRegistry,
 ): PreviewDevice {
-  // mini_program 仅 mobile；web 取设备列表第一个
-  if (surface === "mini_program") {
-    return devices.getDevicesForSurface("mini_program")[0] ?? devices.list()[0];
+  // mini_program 仅 mobile；app 优先 mobile；web 取设备列表第一个
+  if (surface === "mini_program" || surface === "app") {
+    return devices.getDevicesForSurface(surface)[0] ?? devices.list()[0];
   }
   return devices.list()[0];
 }
@@ -48,7 +49,9 @@ export function getPageRoute(
 ): string | undefined {
   const page = pages.getPageById(pageId);
   if (!page) return undefined;
-  return surface === "web" ? page.web?.route : page.miniProgram?.route;
+  return surface === "web" ? page.web?.route
+    : surface === "mini_program" ? page.miniProgram?.route
+    : page.app?.route;
 }
 
 // ─── Role × Surface 合法性 ───
@@ -60,8 +63,8 @@ function roleSupportsSurface(
   pages: PageRegistry,
 ): boolean {
   if (surface === "web") return true;
-  // mini_program：该 role 下有小程序页面才支持
-  return pages.getPagesForSurface("mini_program", role).length > 0;
+  // mini_program / app：该 role 下在该载体有页面才支持
+  return pages.getPagesForSurface(surface, role).length > 0;
 }
 
 function pageSupportsRole(

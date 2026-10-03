@@ -8,17 +8,19 @@ export type PreviewRole = string;
 
 // ─── 维度二：Surface 产品载体 ───
 // 载体保持固定联合（渲染器按载体分发，新增载体需新增渲染器）。
-export type PreviewSurface = "web" | "mini_program";
+export type PreviewSurface = "web" | "mini_program" | "app";
 
 export const SURFACE_LABELS: Record<PreviewSurface, string> = {
   web: "Web",
   mini_program: "小程序",
+  app: "App",
 };
 
 /** Surface 允许的设备族 */
 export const SURFACE_DEVICE_FAMILIES: Record<PreviewSurface, DeviceFamily[]> = {
   web: ["mobile", "tablet", "desktop"],
   mini_program: ["mobile"],
+  app: ["mobile", "tablet"],
 };
 
 // ─── 维度三：Device 设备 ───
@@ -62,6 +64,7 @@ export interface PageDef {
   roles?: PreviewRole[];       // 可访问角色；undefined = 全部
   web?: PageSurfaceRoute;      // Web 路由
   miniProgram?: PageSurfaceRoute; // 小程序路由
+  app?: PageSurfaceRoute;      // App 路由
   sourceFile?: string;         // 实际渲染的源文件（相对项目根），便于定位开发
 }
 

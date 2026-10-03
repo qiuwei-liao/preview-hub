@@ -39,7 +39,9 @@ export function createPageRegistry(
   ): PageDef[] {
     return pages.filter((page) => {
       const hasRoute =
-        surface === "web" ? Boolean(page.web) : Boolean(page.miniProgram);
+        surface === "web" ? Boolean(page.web)
+        : surface === "mini_program" ? Boolean(page.miniProgram)
+        : Boolean(page.app);
       if (!hasRoute) return false;
       if (role && page.roles && !page.roles.includes(role)) return false;
       return true;
@@ -52,7 +54,9 @@ export function createPageRegistry(
   ): string | undefined {
     const page = getPageById(pageId);
     if (!page) return undefined;
-    return surface === "mini_program" ? page.miniProgram?.route : page.web?.route;
+    return surface === "web" ? page.web?.route
+      : surface === "mini_program" ? page.miniProgram?.route
+      : page.app?.route;
   }
 
   function getPageIdByRoute(
@@ -63,7 +67,9 @@ export function createPageRegistry(
     const normalized = route.split("?")[0];
     return getPagesForSurface(surface, role).find((page) => {
       const surfaceRoute =
-        surface === "web" ? page.web?.route : page.miniProgram?.route;
+        surface === "web" ? page.web?.route
+        : surface === "mini_program" ? page.miniProgram?.route
+        : page.app?.route;
       return surfaceRoute?.split("?")[0] === normalized;
     })?.id;
   }

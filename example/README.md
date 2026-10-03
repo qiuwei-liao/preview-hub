@@ -6,7 +6,7 @@
 
 ```
 example/
-├── minimal-config.ts   # 最小配置：2 个角色 + 3 个页面 + 1 个环境
+├── minimal-config.ts   # 最小配置：2 个角色 + 3 个页面 + 1 个环境 + App 载体
 └── usage.tsx           # 怎么在你的 app 里挂载 PreviewHub
 ```
 

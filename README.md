@@ -65,7 +65,7 @@ Preview Hub 的核心是把"一次预览"抽象成四个正交维度的组合，
 | 维度 | 含义 | 取值来源 |
 |---|---|---|
 | **Role（角色）** | 当前以哪种身份视角预览，例如 C 端用户、商家、平台管理员。决定了登录身份、可见页面集、默认路由。 | `config.roles`，接入方定义；包内不预设任何角色。 |
-| **Surface（载体）** | 被预览页面跑在哪种壳里。当前支持 `web`（裸浏览器）与 `mini_program`（小程序壳模拟）；`app` 为未来扩展点。 | 固定联合 `"web" \| "mini_program"`，新增载体需新增渲染器。 |
+| **Surface（载体）** | 被预览页面跑在哪种壳里。当前支持 `web`（裸浏览器）、`mini_program`（小程序壳模拟）与 `app`（iOS 原生 App 壳模拟）。 | 固定联合 `"web" \| "mini_program" \| "app"`，新增载体需新增渲染器。 |
 | **Device（设备）** | 视口尺寸与设备族（phone / pad / desktop），决定 iframe 外层壳的宽高、安全区、状态栏样式。 | 内置 10 款主流设备，可通过 `config.devices` 覆盖或追加。 |
 | **Page（页面）** | 当前预览的具体页面，带路由路径、源文件位置、适用载体等元信息。 | `config.pages`，接入方注册。 |
 
@@ -74,7 +74,7 @@ Preview Hub 的核心是把"一次预览"抽象成四个正交维度的组合，
 ```ts
 interface PreviewExperience {
   role: PreviewRole;          // string
-  surface: PreviewSurface;    // "web" | "mini_program"
+  surface: PreviewSurface;    // "web" | "mini_program" | "app"
   deviceId: string;
   pageId: string;
 }
@@ -133,7 +133,8 @@ Preview Hub 工作台本身和被预览页面跑在同一个 Origin 下（默认
               ├── <FocusCanvas />            ← 单页聚焦画布
               ├── <ComparisonCanvas />       ← 双栏对比画布
               ├── <WebRenderer />            ← Web 渲染器（设备壳 + iframe）
-              └── <MiniProgramRenderer />    ← 小程序渲染器（壳 + iframe + 导航栈）
+              ├── <MiniProgramRenderer />    ← 小程序渲染器（壳 + iframe + 导航栈）
+              └── <AppRenderer />            ← App 渲染器（iOS 原生壳 + iframe + TabBar）
 ```
 
 设计要点：
@@ -246,6 +247,7 @@ export default function PreviewPage() {
 | `devices` | `PreviewDevice[]` | ❌ | 内置 10 款 | 自定义设备集；不传则使用 `DEFAULT_DEVICES`。 |
 | `identities` | `IdentitySpec[]` | ❌ | — | 身份列表，用于真实登录切换；不传则隐藏登录相关 UI。 |
 | `miniapp` | `MiniappConfig` | ❌ | — | 小程序载体配置；不传则隐藏小程序载体。 |
+| `app` | `AppConfig` | ❌ | — | App 载体配置（底部 TabBar）；不传则隐藏 App 载体。 |
 | `environments` | `EnvironmentSpec[]` | ❌ | `[{id:"dev",label:"DEV",...}]` | 环境列表（DEV / STAGING / PROD 等）。 |
 | `iframeBaseUrl` | `string` | ❌ | `""` | iframe src 前缀；空串 = 同源相对路径；跨域预览填目标 Origin。 |
 | `authAdapter` | `AuthAdapter` | ❌ | — | 认证适配器；不传则不执行真实登录。 |
@@ -264,6 +266,7 @@ interface PageDef {
   roles?: PreviewRole[];          // 可访问角色；undefined = 全部
   web?: { route: string };        // Web 路由
   miniProgram?: { route: string };// 小程序路由
+  app?: { route: string };        // App 路由（原生 App 壳内加载）
   sourceFile?: string;            // 源文件位置（相对项目根），用于页面定位条
 }
 ```
@@ -301,7 +304,7 @@ interface MiniappConfig {
 ```typescript
 interface DefaultStateConfig {
   role?: PreviewRole;
-  surface?: PreviewSurface;      // "web" | "mini_program"
+  surface?: PreviewSurface;      // "web" | "mini_program" | "app"
   deviceId?: string;
   pageId?: string;
   theme?: ThemeMode;             // "light" | "dark" | "system"
@@ -319,7 +322,7 @@ interface DefaultStateConfig {
 
 ### 5.1 注入页面注册表
 
-把你项目中需要预览的页面全部登记到 `config.pages`。每个页面通过 `web.route` 与 `miniProgram.route` 分别声明在两种载体下的路径；不支持的载体不传即可。
+把你项目中需要预览的页面全部登记到 `config.pages`。每个页面通过 `web.route`、`miniProgram.route` 与 `app.route` 分别声明在三种载体下的路径；不支持的载体不传即可。
 
 ```typescript
 import type { PageDef } from "@preview-hub/core";
@@ -330,6 +333,7 @@ export const pages: PageDef[] = [
     title: "首页",
     web: { route: "/" },
     miniProgram: { route: "/m/home" },
+    app: { route: "/" },
     sourceFile: "src/app/page.tsx",
   },
   {
@@ -338,13 +342,14 @@ export const pages: PageDef[] = [
     roles: ["customer"],                 // 只有 customer 角色能看到
     web: { route: "/orders" },
     miniProgram: { route: "/m/orders" },
+    app: { route: "/orders" },
     sourceFile: "src/app/orders/page.tsx",
   },
   {
     id: "merchant-dashboard",
     title: "商家后台",
     roles: ["merchant"],                 // 只有 merchant 角色能看到
-    web: { route: "/merchant" },         // 商家后台没有小程序版
+    web: { route: "/merchant" },         // 商家后台没有小程序版 / App 版
     sourceFile: "src/app/merchant/page.tsx",
   },
 ];
@@ -510,7 +515,29 @@ export const previewHubConfig: PreviewHubConfig = {
 };
 ```
 
-### 5.5 在 iframe 内侧接入 Preview Bridge
+### 5.5 配置 App 载体
+
+传 `config.app` 即可解锁"App"载体。**注意：App 壳里加载的依然是同源 Web 页面**（`route` 填真实路由），包外会叠加 iOS 原生风格的导航栏 + 底部 TabBar + Home 指示条模拟原生 App 外观。
+
+```typescript
+import type { PreviewHubConfig } from "@preview-hub/core";
+
+export const previewHubConfig: PreviewHubConfig = {
+  // ...pages / roles / identities ...
+  // 页面需要在 PageDef 里声明 app.route（见 5.1）
+  app: {
+    tabbar: [
+      { pageId: "home", label: "首页", icon: "home" },
+      { pageId: "orders", label: "订单", icon: "list" },
+      { pageId: "me", label: "我的", icon: "mine" },
+    ],
+  },
+};
+```
+
+> TabBar 图标 `icon` 可选 `"home" | "list" | "message" | "mine"`（内置极简 SVG），缺省按 tab 顺序分配。App 载体支持 mobile / tablet 设备族，不提供桌面浏览器壳。
+
+### 5.6 在 iframe 内侧接入 Preview Bridge
 
 工作台通过 postMessage 与被预览页面通信。**包本身不提供 `PreviewBridge` 组件**（因为它依赖 `next/navigation`，是 Next.js 特定的桥接）；你需要在自己的 Next.js 项目里写一个薄组件，组合包导出的 `sendToHub` / `listenPreviewMessages` / `enableReadOnlyGuard` 即可。
 
@@ -677,7 +704,7 @@ import { buildPreviewUrl, parsePreviewUrl } from "@preview-hub/core";
 ```typescript
 interface PreviewUrlParams {
   role?: string;
-  surface?: "web" | "mini_program";
+  surface?: "web" | "mini_program" | "app";
   pageId?: string;
   deviceId?: string;
   route?: string;
@@ -726,6 +753,7 @@ const devices = createDeviceRegistry(/* 不传则用 DEFAULT_DEVICES */);
 devices.getDeviceById("iphone-18-pro");
 devices.getDevicesForFamily("mobile");
 devices.getDevicesForSurface("mini_program");   // 只返回 mobile
+devices.getDevicesForSurface("app");            // 返回 mobile + tablet
 devices.list();
 ```
 
@@ -744,8 +772,8 @@ import type { ThemeTokens } from "@preview-hub/core";
 
 另外导出两个常量：
 
-- `SURFACE_LABELS`：`{ web: "Web", mini_program: "小程序" }`
-- `SURFACE_DEVICE_FAMILIES`：`{ web: ["mobile","tablet","desktop"], mini_program: ["mobile"] }`
+- `SURFACE_LABELS`：`{ web: "Web", mini_program: "小程序", app: "App" }`
+- `SURFACE_DEVICE_FAMILIES`：`{ web: ["mobile","tablet","desktop"], mini_program: ["mobile"], app: ["mobile","tablet"] }`
 
 ### 6.8 会话
 
@@ -759,7 +787,7 @@ import { NoopAuthAdapter } from "@preview-hub/core";
 
 从包根可导入以下类型（`import type { ... }`）：
 
-- **配置相关**：`PreviewHubConfig`、`AuthAdapter`、`SessionDisplayInfo`、`RoleDef`、`SurfaceDef`、`EnvironmentSpec`、`MiniappConfig`、`MiniappPage`、`MiniappTabBarItem`、`DefaultStateConfig`
+- **配置相关**：`PreviewHubConfig`、`AuthAdapter`、`SessionDisplayInfo`、`RoleDef`、`SurfaceDef`、`EnvironmentSpec`、`MiniappConfig`、`MiniappPage`、`MiniappTabBarItem`、`AppConfig`、`AppTabBarItem`、`DefaultStateConfig`
 - **核心模型**：`PreviewRole`、`PreviewSurface`、`PreviewDevice`、`PageDef`、`PageSurfaceRoute`、`PreviewExperience`、`PreviewState`、`PreviewMode`、`ComparisonState`、`ThemeMode`、`IdentitySpec`、`PreviewMessage`、`PreviewMessageType`、`PreviewRenderer`、`DeviceFamily`、`Orientation`
 - **注册表**：`PageRegistry`、`DeviceRegistry`
 - **主题**：`ThemeTokens`
@@ -806,7 +834,9 @@ packages/preview-hub/
     │   ├── web-renderer.tsx  #   Web 渲染器（设备壳 + iframe）
     │   ├── mini-program-renderer.tsx # 小程序渲染器
     │   ├── mini-program-shell.tsx    # 小程序壳（胶囊 + tabbar）
-    │   └── mini-program-navigation.ts # 小程序导航栈纯逻辑
+    │   ├── mini-program-navigation.ts # 小程序导航栈纯逻辑
+    │   ├── app-renderer.tsx  #   App 渲染器（WebView + TabBar）
+    │   └── app-shell.tsx     #   App 壳（iOS 原生导航栏 + TabBar + Home 指示条）
     │
     ├── ui/                   # UI 组件层（全部通过 usePreviewHubConfig() 取配置）
     │   ├── preview-header.tsx
@@ -840,7 +870,7 @@ packages/preview-hub/
 在把 Preview Hub 接入自己项目之前，建议先了解以下边界与限制：
 
 - **小程序载体实际渲染的是同源 Web 页面**。所谓"小程序壳"是在 Web 页面外层叠加一个模拟的胶囊按钮 + tabbar + 导航栈，iframe 里加载的依然是 `/m/*` 这类同源路由。它不是真正的小程序运行时——小程序原生组件、原生 API、分包等无法在此模拟。
-- **App 载体尚未实现**。当前 `PreviewSurface` 仅包含 `"web" | "mini_program"`；原生 App（iOS / Android）载体是未来的扩展点，新增载体需要新增对应渲染器。
+- **App 载体同样是 WebView 模拟**。App 壳（iOS 原生导航栏 + 底部 TabBar + Home 指示条）包裹的是同源 Web 页面；它不是真正的原生 App 运行时，原生 SDK / 推送 / 系统权限等无法在此模拟。切换 App 页面时，被预览页面需要像 Web 端一样接入 Preview Bridge（监听 `preview:set-route`）才能完成客户端导航，否则只显示首个路由页面。
 - **跨域 iframe 需要被预览页面配合接入**。postMessage 通信要求被预览页面一侧也实现 Preview Bridge（监听 `preview:navigate`、上报 `preview:ready` / `preview:route-changed` / `preview:401`）。如果目标页面不在你的控制下（例如第三方站点），工作台只能做静态壳，无法同步路由或触发登录重建。
 - **真实登录依赖接入方实现 `AuthAdapter`**。包内不带任何登录逻辑；如果不传 `config.authAdapter`，工作台会退化为纯静态预览（不触发真实登录、不支持 401 重建），相关 UI 也会自动隐藏。
 - **Preview Bridge 组件留在接入层**。因为它依赖 `next/navigation`（`usePathname` / `useRouter`），是 Next.js 特定的 iframe 内侧桥接，不适合放进框架无关的包内。其他框架（Vite / Remix / CRA）需要自己写等价桥接，协议字段见 [iframe 通信机制](#22-iframe-同源通信机制)。

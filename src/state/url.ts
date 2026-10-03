@@ -38,7 +38,7 @@ export function parsePreviewUrl(
   if (role) result.role = role;
 
   const surface = params.get("surface");
-  if (surface === "web" || surface === "mini_program") {
+  if (surface === "web" || surface === "mini_program" || surface === "app") {
     result.surface = surface;
   }
 

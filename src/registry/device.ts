@@ -26,6 +26,10 @@ export function createDeviceRegistry(devices?: PreviewDevice[]): DeviceRegistry 
     if (surface === "mini_program") {
       return list.filter((d) => d.family === "mobile");
     }
+    if (surface === "app") {
+      // App 载体支持手机与平板，不提供桌面浏览器
+      return list.filter((d) => d.family !== "desktop");
+    }
     return list;
   }
 

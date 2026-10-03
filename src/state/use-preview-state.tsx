@@ -200,11 +200,14 @@ function usePreviewStateInternal() {
       setState((prev) => {
         const device = registries.devices.getDeviceById(deviceId);
         if (!device) return prev;
-        // 校验 surface 约束
+        // 校验 surface 约束：mini_program 仅 mobile；app 支持 mobile/tablet；web 全部
+        const surface = prev.experience.surface;
         const valid =
-          prev.experience.surface === "mini_program"
+          surface === "mini_program"
             ? device.family === "mobile"
-            : true;
+            : surface === "app"
+              ? device.family === "mobile" || device.family === "tablet"
+              : true;
         if (!valid) return prev;
         return {
           ...prev,
@@ -356,12 +359,16 @@ function usePreviewStateInternal() {
 
   const enterComparison = useCallback(() => {
     setState((prev) => {
-      // 默认比较当前 Surface 与它最有价值的对照面：Web ↔ 小程序。
+      // 默认比较当前 Surface 与它最有价值的对照面：Web ↔ 小程序 / App。
+      // 从当前 surface 之外挑一个当前角色有可用页面的载体；都不满足则回落 web。
+      const surfaces: PreviewSurface[] = ["web", "mini_program", "app"];
+      const current = prev.experience.surface;
       const alternateSurface =
-        prev.experience.surface === "web" &&
-        registries.pages.getPagesForSurface("mini_program", prev.experience.role).length > 0
-          ? "mini_program"
-          : "web";
+        surfaces.find(
+          (s) =>
+            s !== current &&
+            registries.pages.getPagesForSurface(s, prev.experience.role).length > 0,
+        ) ?? "web";
       const rightExperience = resolvePreviewExperience(
         {
           role: prev.experience.role,

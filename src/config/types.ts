@@ -51,6 +51,19 @@ export interface MiniappConfig {
   tabbar: MiniappTabBarItem[];
 }
 
+/** App TabBar 项（原生 App 底部导航） */
+export interface AppTabBarItem {
+  pageId: string;
+  label: string;
+  /** 图标类型：内置极简 SVG 图标池（缺省按 tab 顺序分配） */
+  icon?: "home" | "list" | "message" | "mine";
+}
+
+/** App 载体配置 */
+export interface AppConfig {
+  tabbar: AppTabBarItem[];
+}
+
 /** 认证适配器 —— 接入方实现，包内不依赖任何业务 auth */
 export interface AuthAdapter {
   /** 用身份配置执行登录（含角色切换），返回会话展示信息 */
@@ -96,6 +109,8 @@ export interface PreviewHubConfig {
   identities?: IdentitySpec[];
   /** 小程序配置（可选，不传则隐藏小程序载体） */
   miniapp?: MiniappConfig;
+  /** App 载体配置（可选，不传则隐藏 App 载体） */
+  app?: AppConfig;
   /** 环境列表（可选，默认 [{id:"dev",label:"DEV",...}]） */
   environments?: EnvironmentSpec[];
   /** iframe 基地址，默认 ""（同源相对路径）；跨域预览时填目标源 */
