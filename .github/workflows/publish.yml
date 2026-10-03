@@ -1,0 +1,43 @@
+name: Publish to GitHub Packages
+
+# 打 v* tag 时自动发布 npm 包到 GitHub Packages。
+# 通过 GITHUB_TOKEN 发布会自动关联当前仓库，可见性跟随仓库（public → 匿名可安装）。
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: publish npm package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@qiuwei-liao"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to GitHub Packages
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
