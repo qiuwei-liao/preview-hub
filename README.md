@@ -156,17 +156,17 @@ Preview Hub 工作台本身和被预览页面跑在同一个 Origin 下（默认
 
 ### 3.1 安装
 
-Preview Hub 发布为 `@preview-hub/core`，要求 React ≥ 19；Next.js ≥ 14 为可选 peerDependency（仅当你在 Next.js 项目中使用时需要）。
+Preview Hub 发布为 `@qiuwei-liao/preview-hub`，要求 React ≥ 19；Next.js ≥ 14 为可选 peerDependency（仅当你在 Next.js 项目中使用时需要）。
 
 ```bash
 # pnpm
-pnpm add @preview-hub/core
+pnpm add @qiuwei-liao/preview-hub
 
 # npm
-npm install @preview-hub/core
+npm install @qiuwei-liao/preview-hub
 
 # yarn
-yarn add @preview-hub/core
+yarn add @qiuwei-liao/preview-hub
 ```
 
 ### 3.2 最小接入示例（Next.js App Router）
@@ -176,7 +176,7 @@ yarn add @preview-hub/core
 **第 1 步：创建一个配置文件** `preview-hub/config.ts`：
 
 ```typescript
-import type { PreviewHubConfig } from "@preview-hub/core";
+import type { PreviewHubConfig } from "@qiuwei-liao/preview-hub";
 
 export const previewHubConfig: PreviewHubConfig = {
   // 必填：注册你要预览的页面
@@ -216,7 +216,7 @@ export const previewHubConfig: PreviewHubConfig = {
 ```tsx
 "use client";
 
-import { PreviewHub } from "@preview-hub/core";
+import { PreviewHub } from "@qiuwei-liao/preview-hub";
 import { previewHubConfig } from "@/preview-hub/config";
 
 export default function PreviewPage() {
@@ -325,7 +325,7 @@ interface DefaultStateConfig {
 把你项目中需要预览的页面全部登记到 `config.pages`。每个页面通过 `web.route`、`miniProgram.route` 与 `app.route` 分别声明在三种载体下的路径；不支持的载体不传即可。
 
 ```typescript
-import type { PageDef } from "@preview-hub/core";
+import type { PageDef } from "@qiuwei-liao/preview-hub";
 
 export const pages: PageDef[] = [
   {
@@ -366,7 +366,7 @@ export const pages: PageDef[] = [
 身份列表用于"一键切换登录身份"。每项对应一个可登录的测试账号：
 
 ```typescript
-import type { IdentitySpec } from "@preview-hub/core";
+import type { IdentitySpec } from "@qiuwei-liao/preview-hub";
 
 export const identities: IdentitySpec[] = [
   {
@@ -397,8 +397,8 @@ export const identities: IdentitySpec[] = [
 Preview Hub 不绑定任何业务登录系统。你需要实现 `AuthAdapter` 接口，把工作台的"切换身份"动作桥接到你自己的登录逻辑上。
 
 ```typescript
-import type { AuthAdapter, SessionDisplayInfo } from "@preview-hub/core";
-import type { IdentitySpec } from "@preview-hub/core";
+import type { AuthAdapter, SessionDisplayInfo } from "@qiuwei-liao/preview-hub";
+import type { IdentitySpec } from "@qiuwei-liao/preview-hub";
 import {
   loginWithPhoneCode,        // 你自己的业务登录函数
   switchRole,                // 你自己的切角色函数
@@ -478,7 +478,7 @@ export const previewHubConfig: PreviewHubConfig = {
 传 `config.miniapp` 即可解锁"小程序"载体。**注意：小程序壳里加载的依然是同源 Web 页面**（`url` 字段填真实路由），包外会叠加胶囊按钮 + tabbar + 导航栈模拟小程序外观。
 
 ```typescript
-import type { PreviewHubConfig } from "@preview-hub/core";
+import type { PreviewHubConfig } from "@qiuwei-liao/preview-hub";
 
 export const previewHubConfig: PreviewHubConfig = {
   // ...pages / roles / identities ...
@@ -520,7 +520,7 @@ export const previewHubConfig: PreviewHubConfig = {
 传 `config.app` 即可解锁"App"载体。**注意：App 壳里加载的依然是同源 Web 页面**（`route` 填真实路由），包外会叠加 iOS 原生风格的导航栏 + 底部 TabBar + Home 指示条模拟原生 App 外观。
 
 ```typescript
-import type { PreviewHubConfig } from "@preview-hub/core";
+import type { PreviewHubConfig } from "@qiuwei-liao/preview-hub";
 
 export const previewHubConfig: PreviewHubConfig = {
   // ...pages / roles / identities ...
@@ -553,7 +553,7 @@ import {
   listenPreviewMessages,
   enableReadOnlyGuard,
   disableReadOnlyGuard,
-} from "@preview-hub/core";
+} from "@qiuwei-liao/preview-hub";
 
 export function PreviewBridge() {
   const pathname = usePathname();
@@ -592,12 +592,12 @@ export function PreviewBridge() {
 
 ## 6. API 参考
 
-所有导出均从包根入口 `@preview-hub/core` 导入。完整清单见 `src/index.ts`。
+所有导出均从包根入口 `@qiuwei-liao/preview-hub` 导入。完整清单见 `src/index.ts`。
 
 ### 6.1 主组件 `PreviewHub`
 
 ```tsx
-import { PreviewHub } from "@preview-hub/core";
+import { PreviewHub } from "@qiuwei-liao/preview-hub";
 
 <PreviewHub config={myConfig} className="fixed inset-0" style={{ background: "#000" }} />
 ```
@@ -617,7 +617,7 @@ interface PreviewHubProps {
 #### `PreviewHubProvider`
 
 ```tsx
-import { PreviewHubProvider } from "@preview-hub/core";
+import { PreviewHubProvider } from "@qiuwei-liao/preview-hub";
 
 <PreviewHubProvider config={myConfig}>
   {/* 在 PreviewHub 外部、需要读取同一份配置的业务组件 */}
@@ -638,7 +638,7 @@ interface PreviewHubProviderProps {
 在 `PreviewHubProvider` 子树内读取当前配置。**必须在 Provider 内部使用**，否则抛错。
 
 ```typescript
-import { usePreviewHubConfig } from "@preview-hub/core";
+import { usePreviewHubConfig } from "@qiuwei-liao/preview-hub";
 
 function MyEntryButton() {
   const config = usePreviewHubConfig();
@@ -653,7 +653,7 @@ import {
   sendToIframe,
   sendToHub,
   listenPreviewMessages,
-} from "@preview-hub/core";
+} from "@qiuwei-liao/preview-hub";
 ```
 
 | 函数 | 签名 | 调用位置 | 说明 |
@@ -685,7 +685,7 @@ type PreviewMessageType =
 ### 6.4 只读保护工具（`ui/read-only-guard`）
 
 ```typescript
-import { enableReadOnlyGuard, disableReadOnlyGuard } from "@preview-hub/core";
+import { enableReadOnlyGuard, disableReadOnlyGuard } from "@qiuwei-liao/preview-hub";
 ```
 
 | 函数 | 签名 | 说明 |
@@ -698,7 +698,7 @@ import { enableReadOnlyGuard, disableReadOnlyGuard } from "@preview-hub/core";
 ### 6.5 URL 工具（`state/url`）
 
 ```typescript
-import { buildPreviewUrl, parsePreviewUrl } from "@preview-hub/core";
+import { buildPreviewUrl, parsePreviewUrl } from "@qiuwei-liao/preview-hub";
 ```
 
 ```typescript
@@ -729,8 +729,8 @@ buildPreviewUrl({ role: "customer", surface: "web", pageId: "orders" });
 #### `createPageRegistry(pages, aliases?)`
 
 ```typescript
-import { createPageRegistry } from "@preview-hub/core";
-import type { PageRegistry } from "@preview-hub/core";
+import { createPageRegistry } from "@qiuwei-liao/preview-hub";
+import type { PageRegistry } from "@qiuwei-liao/preview-hub";
 
 const registry = createPageRegistry(pages, { home: "me" });
 
@@ -745,8 +745,8 @@ registry.getPageTitle("orders");           // "我的订单"
 #### `createDeviceRegistry(devices?)`
 
 ```typescript
-import { createDeviceRegistry } from "@preview-hub/core";
-import type { DeviceRegistry } from "@preview-hub/core";
+import { createDeviceRegistry } from "@qiuwei-liao/preview-hub";
+import type { DeviceRegistry } from "@qiuwei-liao/preview-hub";
 
 const devices = createDeviceRegistry(/* 不传则用 DEFAULT_DEVICES */);
 
@@ -766,8 +766,8 @@ import {
   darkTheme,         // ThemeTokens
   lightTheme,       // ThemeTokens
   getTheme,          // (theme) => ThemeTokens（system 跟随 prefers-color-scheme）
-} from "@preview-hub/core";
-import type { ThemeTokens } from "@preview-hub/core";
+} from "@qiuwei-liao/preview-hub";
+import type { ThemeTokens } from "@qiuwei-liao/preview-hub";
 ```
 
 另外导出两个常量：
@@ -778,7 +778,7 @@ import type { ThemeTokens } from "@preview-hub/core";
 ### 6.8 会话
 
 ```typescript
-import { NoopAuthAdapter } from "@preview-hub/core";
+import { NoopAuthAdapter } from "@qiuwei-liao/preview-hub";
 ```
 
 `NoopAuthAdapter` 是空实现的 `AuthAdapter`：`login` 返回未登录、`isLoggedIn()` 恒为 `false`。当你不想接入真实登录时，可以显式传入它作为占位。
@@ -801,7 +801,7 @@ import { NoopAuthAdapter } from "@preview-hub/core";
 
 ```
 packages/preview-hub/
-├── package.json              # name: "@preview-hub/core"，type: module，exports 指向 src/index.ts
+├── package.json              # name: "@qiuwei-liao/preview-hub"，type: module，exports 指向 src/index.ts
 ├── tsconfig.json             # 继承根 tsconfig
 ├── README.md                 # 本文档
 ├── LICENSE                   # MIT
@@ -871,6 +871,7 @@ packages/preview-hub/
 
 - **小程序载体实际渲染的是同源 Web 页面**。所谓"小程序壳"是在 Web 页面外层叠加一个模拟的胶囊按钮 + tabbar + 导航栈，iframe 里加载的依然是 `/m/*` 这类同源路由。它不是真正的小程序运行时——小程序原生组件、原生 API、分包等无法在此模拟。
 - **App 载体同样是 WebView 模拟**。App 壳（iOS 原生导航栏 + 底部 TabBar + Home 指示条）包裹的是同源 Web 页面；它不是真正的原生 App 运行时，原生 SDK / 推送 / 系统权限等无法在此模拟。切换 App 页面时，被预览页面需要像 Web 端一样接入 Preview Bridge（监听 `preview:set-route`）才能完成客户端导航，否则只显示首个路由页面。
+- **注意避免"双 TabBar"**。App 壳的底部 TabBar（`config.app.tabbar`）与页面自带底部导航互斥：如果被预览的页面自身已经是带底部导航的移动端 H5（例如小程序页面直接拿来当 `app.route` 预览），再配置 `config.app.tabbar` 会叠出两层 TabBar（一层页面自带的、一层 App 壳的）。按场景二选一：页面自带导航 → 不配置 `config.app.tabbar`（App 壳只保留状态栏 + 导航栏）；想用 App 壳的 TabBar → 被预览页面应去掉自带底部导航，只渲染纯内容。App 载体面向"原生壳 + 纯内容页"的形态；自带完整导航的页面更适合用 Web 或小程序载体预览。
 - **跨域 iframe 需要被预览页面配合接入**。postMessage 通信要求被预览页面一侧也实现 Preview Bridge（监听 `preview:navigate`、上报 `preview:ready` / `preview:route-changed` / `preview:401`）。如果目标页面不在你的控制下（例如第三方站点），工作台只能做静态壳，无法同步路由或触发登录重建。
 - **真实登录依赖接入方实现 `AuthAdapter`**。包内不带任何登录逻辑；如果不传 `config.authAdapter`，工作台会退化为纯静态预览（不触发真实登录、不支持 401 重建），相关 UI 也会自动隐藏。
 - **Preview Bridge 组件留在接入层**。因为它依赖 `next/navigation`（`usePathname` / `useRouter`），是 Next.js 特定的 iframe 内侧桥接，不适合放进框架无关的包内。其他框架（Vite / Remix / CRA）需要自己写等价桥接，协议字段见 [iframe 通信机制](#22-iframe-同源通信机制)。

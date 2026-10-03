@@ -1,7 +1,7 @@
 // 最小配置示例：2 个角色 + 3 个页面 + 1 个环境 + App 载体
 // 复制到你自己的项目后，把 route 改成你实际的页面路径。
 
-import type { PreviewHubConfig, PageDef, RoleDef } from "@preview-hub/core";
+import type { PreviewHubConfig, PageDef, RoleDef } from "@qiuwei-liao/preview-hub";
 
 // 1) 定义你有哪些页面
 const pages: PageDef[] = [
@@ -44,7 +44,9 @@ export const minimalConfig: PreviewHubConfig = {
       origin: "http://localhost:3000",
     },
   ],
-  // App 载体底部导航（可选，不传则隐藏 App 载体）
+  // App 载体底部导航（可选，不传则隐藏 App 载体）。
+  // 注意：仅当被预览页面为"纯内容页"（不带自带底部导航）时才配置 tabbar；
+  // 若页面自身已是带底部导航的移动端 H5，请留空本配置，避免出现"双 TabBar"。
   app: {
     tabbar: [
       { pageId: "home", label: "首页", icon: "home" },
