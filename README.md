@@ -156,7 +156,15 @@ Preview Hub 工作台本身和被预览页面跑在同一个 Origin 下（默认
 
 ### 3.1 安装
 
-Preview Hub 发布为 `@qiuwei-liao/preview-hub`，要求 React ≥ 19；Next.js ≥ 14 为可选 peerDependency（仅当你在 Next.js 项目中使用时需要）。
+Preview Hub 发布为 `@qiuwei-liao/preview-hub`（托管于 GitHub Packages），要求 React ≥ 19；Next.js ≥ 14 为可选 peerDependency（仅当你在 Next.js 项目中使用时需要）。
+
+GitHub Packages 的包需要先告诉 npm 从哪里拉取该 scope。在项目根目录创建 `.npmrc`：
+
+```ini
+@qiuwei-liao:registry=https://npm.pkg.github.com
+```
+
+然后安装：
 
 ```bash
 # pnpm
@@ -168,6 +176,8 @@ npm install @qiuwei-liao/preview-hub
 # yarn
 yarn add @qiuwei-liao/preview-hub
 ```
+
+> 拉取时若遇到 401/403，说明你的 npm 客户端尚未对 GitHub Packages 认证：设置环境变量 `GH_TOKEN`（或 `NODE_AUTH_TOKEN`）为有 `read:packages` 权限的 GitHub token 后重试。
 
 ### 3.2 最小接入示例（Next.js App Router）
 
